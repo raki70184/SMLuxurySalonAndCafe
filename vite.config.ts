@@ -1,11 +1,44 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 import viteCompression from "vite-plugin-compression";
 
+/**
+ * OneKlick live-chat widget embed. Injected only when both env vars are set,
+ * so the tag's presence, API host and token are per-Netlify-context config
+ * (netlify.toml), not code: production → api.oneklickai.net + store 1's prod
+ * token; deploy previews → dev-api + the dev-mirror token. Unset → no widget
+ * (and App.tsx keeps Tawk.to as the fallback). Colours match the site's
+ * black-and-gold palette; ChatPortal's brand colour, when set, wins.
+ */
+function oneklickChatWidget(env: Record<string, string>): Plugin {
+  const src = env.VITE_ONEKLICK_WIDGET_SRC;
+  const token = env.VITE_ONEKLICK_WIDGET_TOKEN;
+  return {
+    name: "oneklick-chat-widget",
+    transformIndexHtml() {
+      if (!src || !token) return [];
+      return [
+        {
+          tag: "script",
+          attrs: {
+            src,
+            "data-token": token,
+            "data-brand-color": "#1A1A1A",
+            "data-accent-color": "#EED26E",
+            async: true,
+          },
+          injectTo: "body",
+        },
+      ];
+    },
+  };
+}
+
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
+    oneklickChatWidget(loadEnv(mode, process.cwd(), "VITE_")),
     react(),
     svgr(),
     // Emit .gz and .br alongside .js/.css/.html so Netlify can serve compressed.
@@ -42,4 +75,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

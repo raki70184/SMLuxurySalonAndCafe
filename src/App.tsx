@@ -15,6 +15,13 @@ import PageHero from "./components/Hero/PageHero";
 import { Seo } from "./components/Seo/Seo";
 import { Analytics } from "./components/Analytics/Analytics";
 import ChatWidget from "./components/ChatWidget/ChatWidget";
+
+// OneKlick live chat (injected by vite.config.ts when this build has a widget
+// token — see netlify.toml) replaces Tawk.to. Tawk stays only as the fallback
+// for builds without a token, so the site is never left without a chat.
+const ONEKLICK_CHAT_ON = Boolean(
+  import.meta.env.VITE_ONEKLICK_WIDGET_TOKEN && import.meta.env.VITE_ONEKLICK_WIDGET_SRC
+);
 import "./styles.css";
 
 /*
@@ -31,7 +38,7 @@ function AppContent() {
     <>
       <Seo pathname={location.pathname} />
       <Analytics />
-      <ChatWidget />
+      {!ONEKLICK_CHAT_ON && <ChatWidget />}
       <div className="App">
         <AppBarComponent />
         <PageHero />
