@@ -15,7 +15,7 @@
     "cld:upload": "node scripts/cld-upload.mjs",
     "cld:upload:dry": "node scripts/cld-upload.mjs --dry",
     "favicons": "node scripts/gen-favicons.mjs",
-    "prerender": "node scripts/prerender.mjs",
+    "prerender": "puppeteer browsers install chrome && node scripts/prerender.mjs",
     "fetch:rating": "node scripts/fetch-google-rating.mjs"
   },
   "dependencies": {
