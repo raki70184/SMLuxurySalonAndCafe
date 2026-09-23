@@ -147,6 +147,13 @@ try {
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(30000);
     await page.setViewport({ width: 1280, height: 800, deviceScaleFactor: 1 });
+    // Never run the OneKlick chat widget while baking static HTML: it would
+    // call the live API at build time and bake its host element into the page.
+    // The <script> tag itself stays in the capture and runs for real visitors.
+    await page.setRequestInterception(true);
+    page.on("request", (req) =>
+      /\/widget\.js(\?|$)|\/public\/widget\//.test(req.url()) ? req.abort() : req.continue()
+    );
 
     const url = `${baseUrl}${route}`;
     console.log(`  ${route} -> rendering…`);
