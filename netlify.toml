@@ -9,13 +9,17 @@
 
 # ── OneKlick live-chat widget (vite.config.ts injects it when both are set) ──
 # Replaces Tawk.to: visitors' messages land in ChatPortal → Inbox → Website
-# chat and FAQs auto-reply. Production = prod API + the store-1 token minted in
-# ChatPortal (Website Widget → Generate embed code). Until that token is pasted
-# below, production builds keep Tawk.to (App.tsx fallback) — no chat gap.
+# chat and FAQs auto-reply. Production = prod API + store 1's widget token,
+# minted in ChatPortal (Website Widget → Generate embed code). That token is a
+# public, rotatable embed id — it ships in the page source every visitor can
+# read, so it is not a secret; "Rotate token" in ChatPortal revokes it.
 # Deploy previews use the dev API + dev store 13 (SM Luxury dev mirror).
+#
+# These context values override anything set in the Netlify UI, so the token
+# has to live here — setting it in the dashboard alone would not reach the build.
 [context.production.environment]
   VITE_ONEKLICK_WIDGET_SRC = "https://api.oneklickai.net/widget.js"
-  VITE_ONEKLICK_WIDGET_TOKEN = ""   # ← paste prod store 1 widget token
+  VITE_ONEKLICK_WIDGET_TOKEN = "RRLr_uN7heboKapot71_D1A6dqkkEHeg"   # prod store 1
 
 [context.deploy-preview.environment]
   VITE_ONEKLICK_WIDGET_SRC = "https://dev-api.oneklickai.net/widget.js"
