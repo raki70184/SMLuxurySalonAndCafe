@@ -19,3 +19,17 @@
 .appointment button:hover {
   background-color: #bbc1b9;
 }
+/* Post-submit confirmation: contact options list */
+.contact-confirmation,
+.contact-confirmation * {
+  text-transform: none !important;
+}
+.confirmation-contacts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  line-height: 2;
+}
+.confirmation-contacts a {
+  font-weight: 600;
+}

@@ -47,11 +47,7 @@ export const Contact = () => {
             </Typography>
             <Typography variant="h6">
               <AccessTimeOutlinedIcon className="icon" />
-              Monday to Friday: 11:00 AM - 09:00 PM
-            </Typography>
-            <Typography variant="h6">
-              <AccessTimeOutlinedIcon className="icon" />
-              Saturday & Sunday: 10:00 AM - 9:00 PM
+              All days (Monday to Sunday): 11:00 AM - 9:00 PM
             </Typography>
           </Grid>
           <Grid item>

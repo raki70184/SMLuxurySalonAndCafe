@@ -86,7 +86,7 @@ export const Footer = () => {
           </Typography>
           <Typography className="footerLine"><strong>Phone:</strong> <a href="tel:+919347238248">+91 93472 38248</a></Typography>
           <Typography className="footerLine"><strong>Email:</strong> <a href="mailto:smluxesalon@gmail.com">smluxesalon@gmail.com</a></Typography>
-          <Typography className="footerLine"><strong>Business Hours:</strong> Mon–Fri: 11:00 AM - 09:00 PM; Sat & Sun: 10:00 AM - 9:00 PM</Typography>
+          <Typography className="footerLine"><strong>Business Hours:</strong> All days (Mon–Sun): 11:00 AM – 9:00 PM</Typography>
         </Grid>
       </Grid>
 
