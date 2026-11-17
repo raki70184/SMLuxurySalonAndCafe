@@ -23,7 +23,7 @@ const FAQ_ITEMS: FaqEntry[] = [
   {
     question: "What are your opening hours?",
     answer:
-      "Monday to Friday: 11:00 AM – 9:00 PM. Saturday and Sunday: 10:00 AM – 9:00 PM. We're open seven days a week.",
+      "We're open all seven days, Monday to Sunday, 11:00 AM – 9:00 PM.",
   },
   {
     question: "Do I need to book an appointment, or can I walk in?",

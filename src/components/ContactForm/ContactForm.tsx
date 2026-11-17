@@ -11,8 +11,10 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LoadingButton } from "@mui/lab";
+import dayjs, { type Dayjs } from "dayjs";
 
 import { PostDetailsUrl } from "../utils/constants";
+import { describeSource, getAttribution, trackEvent } from "../../lib/tracking";
 
 import "./ContactForm.css"; // Import the CSS file for styles
 
@@ -21,10 +23,17 @@ interface FormData {
   phone: string;
   email: string;
   message: string;
-  schedule: string | null;
+  schedule: Dayjs | null;
 }
 
-const initialFormData = {
+const SALON_PHONE_DISPLAY = "+91 93472 38248";
+const SALON_PHONE_TEL = "+919347238248";
+const SALON_WHATSAPP = "https://wa.me/919347238248";
+const SALON_INSTAGRAM = "https://instagram.com/sm.luxe_";
+const SALON_EMAIL = "smluxesalon@gmail.com";
+const SALON_HOURS = "Open all days, 11:00 AM – 9:00 PM";
+
+const initialFormData: FormData = {
   name: "",
   phone: "",
   email: "",
@@ -41,6 +50,8 @@ const ContactForm: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>(initialFormData);
+  // Snapshot of what was sent, so the confirmation can echo the name + date.
+  const [confirmed, setConfirmed] = useState<{ name: string; date: string | null } | null>(null);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Remove non-digit characters from the input
@@ -57,12 +68,32 @@ const ContactForm: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage(null);
+    const payload = new FormData(form.current);
+    // Human-readable date for the salon's email + sheet (the picker's raw value is MM/DD/YYYY).
+    const visitDate = formData.schedule ? dayjs(formData.schedule).format("ddd, D MMM YYYY") : null;
+    payload.set("schedule", visitDate ?? "");
+    payload.set("page", typeof window !== "undefined" ? window.location.href : "");
+    // How this visitor reached the site (Google Ads click, utm tags, landing page).
+    const attribution = getAttribution();
+    const source = describeSource(attribution);
+    payload.set("source", source);
+    for (const [key, value] of Object.entries(attribution)) {
+      if (value) payload.set(key, value);
+    }
     fetch(form.current.action, {
       method: form.current.method,
-      body: new FormData(form.current),
+      body: payload,
     })
       .then((response) => {
-        setSubmitted(response.ok);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        // GA4 lead conversion: mark generate_lead as a key event and import into Google Ads.
+        trackEvent("generate_lead", {
+          form_id: "contact-form",
+          lead_source: source,
+          has_visit_date: Boolean(visitDate),
+        });
+        setConfirmed({ name: formData.name.trim().split(/\s+/)[0] || "", date: visitDate });
+        setSubmitted(true);
         setFormData(initialFormData);
         setIsLoading(false);
       })
@@ -77,27 +108,61 @@ const ContactForm: React.FC = () => {
       {submitted ? (
         <Grid
           container
+          flexDirection={"column"}
           alignItems={"center"}
           textAlign={"center"}
-          justifyContent={"center"}
-          spacing={3}
+          spacing={2}
           marginTop={2}
+          padding={2}
+          className="contact-confirmation"
+          data-track-location="form_confirmation"
         >
           <Grid item>
-            <Alert severity="success" sx={{ fontStyle: "italic" }}>
-              The information has been submitted successfully !
+            <Alert severity="success">
+              {confirmed?.name ? `Thank you, ${confirmed.name}! ` : "Thank you! "}
+              We've received your visit request
+              {confirmed?.date ? ` for ${confirmed.date}` : ""}.
             </Alert>
           </Grid>
-          <Grid item sx={{ fontStyle: "italic" }}>
-            DM{" "}
-            <a
-              target="blank"
-              className="instagram"
-              href="https://instagram.com/sm.luxe_?igshid=MzRlODBiNWFlZA=="
-            >
-              @sm.luxe_
-            </a>{" "}
-            for any other queries !!
+          <Grid item>
+            <Typography variant="body1">
+              Our team will call or WhatsApp you shortly to confirm your time
+              slot. A copy of your request has been sent to your email.
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Typography variant="body1" fontWeight={600}>
+              Need to change the date, time or service? Reach us any way you like:
+            </Typography>
+          </Grid>
+          <Grid item>
+            <ul className="confirmation-contacts">
+              <li>
+                Call: <a href={`tel:${SALON_PHONE_TEL}`}>{SALON_PHONE_DISPLAY}</a>
+              </li>
+              <li>
+                WhatsApp:{" "}
+                <a href={SALON_WHATSAPP} target="_blank" rel="noopener noreferrer">
+                  message us on WhatsApp
+                </a>
+              </li>
+              <li>
+                Instagram DM:{" "}
+                <a href={SALON_INSTAGRAM} target="_blank" rel="noopener noreferrer" className="instagram">
+                  @sm.luxe_
+                </a>
+              </li>
+              <li>Live chat: tap the chat bubble at the bottom-right of this page</li>
+              <li>
+                Email: <a href={`mailto:${SALON_EMAIL}`}>{SALON_EMAIL}</a>
+              </li>
+            </ul>
+          </Grid>
+          <Grid item>
+            <Typography variant="body2" sx={{ fontStyle: "italic" }}>
+              {SALON_HOURS} · Jain Balaji BigTown Mall, Shop 304, 3rd Floor,
+              Safilguda, Malkajgiri
+            </Typography>
           </Grid>
         </Grid>
       ) : (
@@ -197,6 +262,7 @@ const ContactForm: React.FC = () => {
                         },
                       }}
                       label="Appointment Date"
+                      disablePast
                       value={formData.schedule}
                       sx={{ width: "100%" }}
                       onChange={(e) =>

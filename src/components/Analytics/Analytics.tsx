@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { captureAttribution, installClickTracking } from "../../lib/tracking";
 
 /**
  * Visitor analytics: Google Analytics 4 + Cloudflare Web Analytics.
@@ -30,6 +31,10 @@ export const Analytics: React.FC = () => {
   // One-time script injection on first mount in the browser.
   useEffect(() => {
     if (typeof document === "undefined") return;
+
+    // Lead attribution + call/WhatsApp/Instagram click events (src/lib/tracking.ts).
+    captureAttribution();
+    installClickTracking();
 
     if (GA4_ID && !document.getElementById("ga4-loader")) {
       const loader = document.createElement("script");

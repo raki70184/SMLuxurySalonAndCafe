@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Phone } from "lucide-react";
 import styles from "./FloatingCall.module.css";
+import { trackContactClick } from "../../lib/tracking";
 
 type Content = {
   brand: string;
@@ -93,25 +94,29 @@ const FloatingCall: React.FC = () => {
           </button>
           <div className={styles.brand}>{content.brand}</div>
           <p className={styles.desc}>{content.description}</p>
-          <div className={styles.number}>
+          <div className={styles.number} data-track-location="floating_call">
             <a href={content.telHref}>{content.phone}</a>
           </div>
           <div className={styles.actions}>
             <button
               className={styles.actionBtn}
-              onClick={() => (window.location.href = content.telHref)}
+              onClick={() => {
+                trackContactClick("call", "floating_call");
+                window.location.href = content.telHref;
+              }}
             >
               Call Now
             </button>
             <button
               className={styles.actionBtn}
-              onClick={() =>
+              onClick={() => {
+                trackContactClick("whatsapp", "floating_call");
                 window.open(
                   `https://wa.me/${formatTel(content.phone)}`,
                   "_blank",
                   "noopener,noreferrer"
-                )
-              }
+                );
+              }}
             >
               WhatsApp
             </button>
